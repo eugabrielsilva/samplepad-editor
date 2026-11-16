@@ -102,6 +102,7 @@ module.exports = {
     if (wavSpawn[wavId]) {
       wavSpawn[wavId].removeAllListeners('close')
       wavSpawn[wavId].removeAllListeners('error')
+      wavSpawn[wavId].once('error', () => {})
       wavSpawn[wavId].kill()
       delete wavSpawn[wavId]
     }
