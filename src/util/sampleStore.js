@@ -40,10 +40,11 @@ class SampleStore {
       return ""
     }
 
-    let sample = Object.entries(this.deviceSamples).find(([displayName, fileNameOnDisk]) => {
-      return displayName.toLowerCase() === fileName.toLowerCase()
-        || fileNameOnDisk.toLowerCase() === fileName.toLowerCase()
-    })
+    let entries = Object.entries(this.deviceSamples)
+    let normalizedName = fileName.toLowerCase()
+    let sample = entries.find(([displayName]) => displayName === fileName)
+      || entries.find(([displayName]) => displayName.toLowerCase() === normalizedName)
+      || entries.find(([, fileNameOnDisk]) => fileNameOnDisk.toLowerCase() === normalizedName)
 
     return this.devicePath + "/" + (sample ? sample[1] : fileName)
   }
