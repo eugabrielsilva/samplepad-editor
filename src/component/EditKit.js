@@ -21,7 +21,7 @@ const EditKit = (props) => {
   }
 
   return (
-    <section>
+    <section className="kit-editor">
       <div className="kit">
         <div className="is-size-3">Kit: {props.originalKitName}</div>
         <div className="field is-grouped">

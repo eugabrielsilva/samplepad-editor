@@ -1,10 +1,18 @@
 .SampleList {
-  margin: .5em 0 0 .5em;
+  padding: .5em;
+  height: 100%;
+
+  .panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
 
   .samples {
     width: 100%;
-    overflow-y: scroll;
-    max-height: 30em;
+    overflow: auto;
+    flex: 1;
 
     button.sample {
       text-align: left;
@@ -25,7 +33,7 @@
         width: 100%;
         background: white;
         border-radius: 2px;
-        box-shadow: 0 2px 3px 0 rgba(0,0,0,.1),inset 0 0 0 1px rgba(0,0,0,.1);
+        box-shadow: 0 2px 3px 0 rgba(0, 0, 0, .1), inset 0 0 0 1px rgba(0, 0, 0, .1);
 
         .sampleName {
           background: white;

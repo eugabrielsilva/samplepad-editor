@@ -1,0 +1,11 @@
+.App {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    section.columns {
+        flex: 1;
+        overflow: hidden;
+    }
+}

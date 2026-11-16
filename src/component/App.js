@@ -13,6 +13,7 @@ import NoticeComponent from 'component/Notice'
 import EditKitComponent from 'component/EditKit'
 import HeaderComponent from 'component/Header'
 import SampleListComponent from 'component/SampleList'
+import 'css/App.scss'
 
 const AppComponent = (props) => {
   return (
