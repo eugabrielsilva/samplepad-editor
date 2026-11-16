@@ -233,7 +233,7 @@ export function validateKit(kitId) {
     let prevErrors = kit.errors;
     let errors = [];
 
-    if (!/^[a-z0-9]+$/i.test(kit.kitName)) {
+    if (!/^[a-z0-9_]+$/i.test(kit.kitName)) {
       errors.push(KitErrors.INVALID_KIT_NAME)
     }
 

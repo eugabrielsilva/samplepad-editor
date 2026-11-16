@@ -51,7 +51,7 @@ export const KitErrors = {
 };
 
 export const KitErrorStrings = {
-  INVALID_KIT_NAME: 'Kit name contains invalid characters (A-Z, a-z, 0-9 only)',
+  INVALID_KIT_NAME: 'Kit name contains invalid characters (A-Z, _, a-z, 0-9 only)',
 };
 
 export const DragItemTypes = {
