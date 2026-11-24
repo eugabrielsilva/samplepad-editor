@@ -1,9 +1,9 @@
 /* App imports */
 import store from 'state/store'
 import { selectAndLoadDrive } from 'actions/drive'
+import { getPlatformApi } from 'platform/runtime'
 
-/* Electron imports */
-const { mainProcessCallbacks } = window.api
+const { mainProcessCallbacks } = getPlatformApi()
 
 /**
  * Initialize the renderer process handlers for the menu
@@ -16,5 +16,5 @@ export const initEditMenu = () => {
  * "Load SD Card" has been selected from the menu
  */
 export const loadSDCard = () => {
-  store.dispatch(selectAndLoadDrive());
+  return store.dispatch(selectAndLoadDrive());
 }

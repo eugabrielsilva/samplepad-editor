@@ -1,0 +1,9 @@
+{
+  "appId": "com.electron.samplepadeditor",
+  "appName": "SamplePad Kit Editor",
+  "webDir": "build",
+  "ios": {
+    "contentInset": "automatic",
+    "backgroundColor": "#ffffff"
+  }
+}

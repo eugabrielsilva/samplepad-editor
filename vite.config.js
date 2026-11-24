@@ -17,7 +17,8 @@ export default defineConfig({
       menu: resolve(process.cwd(), 'src/menu'),
       util: resolve(process.cwd(), 'src/util'),
       css: resolve(process.cwd(), 'src/css'),
-      const: resolve(process.cwd(), 'src/const.js')
+      const: resolve(process.cwd(), 'src/const.js'),
+      platform: resolve(process.cwd(), 'src/platform')
     }
   },
   esbuild: {

@@ -1,6 +1,7 @@
 /* App imports */
 import { Actions } from 'const';
 import { loadKitDetails } from 'actions/kit';
+import { isElectron } from 'platform/runtime'
 
 /** APP ACTION CREATORS */
 /**
@@ -8,6 +9,14 @@ import { loadKitDetails } from 'actions/kit';
  * @param {String} kitId
  */
 export function selectKit(kitId) {
+  if (!isElectron) {
+    return async (dispatch) => {
+      await dispatch(loadKitDetails(kitId))
+      dispatch({ type: Actions.SET_SELECTED_KIT_ID, kitId })
+      dispatch({ type: Actions.SET_ACTIVE_KIT_ID, kitId })
+    }
+  }
+
   return (dispatch, getState) => {
     // if the kit isnt loaded, load it before activating it
     dispatch(loadKitDetails(kitId));

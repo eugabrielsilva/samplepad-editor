@@ -7,8 +7,9 @@ import { Actions, DeviceType } from 'const'
 import { getGlobalStateFromDirectory } from 'state/globalState';
 import { getSortedKitIds } from 'state/sortModels';
 import { getLastLoadedDirectory } from 'util/storage';
+import { isElectron } from 'platform/runtime'
 
-let lastLoadedDirectory = getLastLoadedDirectory();
+let lastLoadedDirectory = isElectron ? getLastLoadedDirectory() : null;
 let initialState = {
   modals: {
     confirmOverwriteVisible: false,

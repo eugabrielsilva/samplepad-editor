@@ -5,9 +5,9 @@ import update from 'immutability-helper'
 
 /* App imports */
 import SampleStore from 'util/sampleStore'
+import { getPlatformApi } from 'platform/runtime'
 
-/* Electron imports */
-const { wav, midi } = window.api
+const { wav, midi } = getPlatformApi()
 
 
 class SamplePlayerComponent extends React.Component {

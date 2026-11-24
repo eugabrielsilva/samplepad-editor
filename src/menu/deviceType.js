@@ -2,9 +2,10 @@
 import { Actions } from 'const';
 import store from 'state/store'
 import { getGlobalStateFromDirectory, writeDeviceDetailsToFile } from 'state/globalState';
+import { getPlatformApi } from 'platform/runtime'
+import { isElectron } from 'platform/runtime'
 
-/* Electron imports */
-const { mainProcessCallbacks, mainProcessTriggers } = window.api
+const { mainProcessCallbacks, mainProcessTriggers } = getPlatformApi()
 
 /**
  * Initialize the renderer process handlers for the device type menu
@@ -24,6 +25,10 @@ export const resetDeviceType = (deviceType) => {
  * A SamplePad device type has been selected from the menu, update the root model
  */
 export const selectDeviceTypeItem = (deviceType) => {
+  if (!isElectron) {
+    return selectDeviceTypeItemCapacitor(deviceType)
+  }
+
   // todo: should show a warning before doing this, since you could lose unsaved data
   let state = store.getState();
 
@@ -46,5 +51,23 @@ export const selectDeviceTypeItem = (deviceType) => {
   } else {
     // change the drive device type
     store.dispatch({ type: Actions.SET_DEVICE_TYPE, deviceType: deviceType });
+  }
+}
+
+const selectDeviceTypeItemCapacitor = async (deviceType) => {
+  const state = store.getState()
+
+  if (state.drive.deviceId) {
+    store.dispatch({ type: Actions.SET_SELECTED_KIT_ID, kitId: null })
+    store.dispatch({ type: Actions.SET_ACTIVE_KIT_ID, kitId: null })
+    store.dispatch({ type: Actions.SET_DEVICE_TYPE, deviceType })
+
+    await writeDeviceDetailsToFile(state.drive.rootPath, state.drive.deviceId, deviceType)
+    const { kits } = await getGlobalStateFromDirectory(state.drive.rootPath)
+
+    store.dispatch({ type: Actions.RESET_KITS, kits })
+    store.dispatch({ type: Actions.SORT_KITS })
+  } else {
+    store.dispatch({ type: Actions.SET_DEVICE_TYPE, deviceType })
   }
 }

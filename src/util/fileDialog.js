@@ -1,8 +1,8 @@
 /* App imports */
 import { Drive } from 'const';
+import { getPlatformApi } from 'platform/runtime'
 
-/* Electron imports */
-const { dialog } = window.api;
+const { dialog } = getPlatformApi()
 
 /**
  * Open a file dialog with appropriate file type filters for kits

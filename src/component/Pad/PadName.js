@@ -1,9 +1,9 @@
 /* Global imports */
 import React from 'react';
 import { v1 as uuidv1 } from 'uuid';
+import { getPlatformApi } from 'platform/runtime'
 
-/* Electron imports */
-const { midi } = window.api
+const { midi } = getPlatformApi()
 
 class PadName extends React.Component {
 

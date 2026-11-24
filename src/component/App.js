@@ -3,9 +3,11 @@ import React from 'react';
 import { connect } from 'react-redux'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import { TouchBackend } from 'react-dnd-touch-backend'
 
 /* App imports */
 import { selectAndLoadDrive } from 'actions/drive'
+import { isIos } from 'platform/runtime'
 
 /* Component imports */
 import ModalComponent from 'component/Modal'
@@ -16,10 +18,14 @@ import SampleListComponent from 'component/SampleList'
 import 'css/App.scss'
 
 const AppComponent = (props) => {
+  const appClassName = isIos ? 'App capacitor-app' : 'App'
+
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider
+      backend={isIos ? TouchBackend : HTML5Backend}
+      options={isIos ? { enableMouseEvents: false, delayTouchStart: 100 } : undefined}>
         {props.showSplash &&
-          <div className="App">
+          <div className={appClassName}>
             <HeaderComponent />
             <div className="splash is-medium">
               <p>Make sure your SamplePad SD card is inserted into your computer. Click the "Load SD Card" button below and select the root directory of the SD card</p>
@@ -29,7 +35,7 @@ const AppComponent = (props) => {
         }
 
         {!props.showSplash &&
-          <div className="App">
+          <div className={appClassName}>
             <ModalComponent />
             <NoticeComponent notices={props.notices} />
             <HeaderComponent />

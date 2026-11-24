@@ -1,7 +1,13 @@
 /* Electron imports */
 import { Buffer } from 'buffer'
-const { fs } = window.api
+import { getPlatformApi, isElectron } from 'platform/runtime'
+
+const { fs } = getPlatformApi()
 
 export const getBuffer = (filePath) => {
-  return Buffer.from(fs.readFileBufferArray(filePath));
+  if (isElectron) {
+    return Buffer.from(fs.readFileBufferArray(filePath));
+  }
+
+  return fs.readFileBufferArray(filePath).then((data) => Buffer.from(data))
 }

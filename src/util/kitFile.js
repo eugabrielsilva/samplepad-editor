@@ -5,9 +5,9 @@ import { KitModel, PadModel } from 'state/models'
 import { getSortedPadIds } from 'state/sortModels'
 import { getBuffer } from 'util/buffer'
 import SampleStore from 'util/sampleStore'
+import { getPlatformApi, isElectron } from 'platform/runtime'
 
-/* Electron imports */
-const { fs, path } = window.api;
+const { fs, path } = getPlatformApi()
 
 /** @var { Map } memory location within individual memory blocks for each parameter */
 const MEMLOC = {
@@ -43,6 +43,10 @@ const MEMLOC = {
  * @return {KitModel, PadModel[]} kit, pads
  */
 export const getKitAndPadsFromFile = (drive, kitFile) => {
+  if (!isElectron) {
+    return getKitAndPadsFromFileCapacitor(drive, kitFile)
+  }
+
   if(!fs.exists(kitFile)) {
     return null;
   }
@@ -69,6 +73,33 @@ export const getKitAndPadsFromFile = (drive, kitFile) => {
   );
 
   return {kit, pads};
+}
+
+const getKitAndPadsFromFileCapacitor = async (drive, kitFile) => {
+  if (!await fs.exists(kitFile)) {
+    return null
+  }
+
+  const kitPath = path.parse(kitFile)
+  const buffer = await getBuffer(kitFile)
+  const checksum = buffer.readUInt8(KitBuffer.CHECKSUM_BYTE)
+
+  if (checksum !== calculateChecksumFromBuffer(buffer)) {
+    throw new Error("Invalid .kit file")
+  }
+
+  const pads = getPadsFromBuffer(drive, buffer)
+  const kit = KitModel(
+    kitPath.dir,
+    kitPath.base,
+    true,
+    false,
+    true,
+    kitPath.name,
+    getSortedPadIds(drive, pads)
+  )
+
+  return { kit, pads }
 }
 
 /**

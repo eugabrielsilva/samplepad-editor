@@ -9,3 +9,49 @@
         overflow: hidden;
     }
 }
+
+.App.capacitor-app {
+  height: 100dvh;
+}
+
+.capacitor-controls {
+  padding-top: env(safe-area-inset-top);
+
+  .field {
+    margin-bottom: 0;
+  }
+}
+
+.capacitor-kit-list {
+  margin-top: .75rem;
+}
+
+@media (max-width: 800px) {
+  .App {
+    overflow: auto;
+
+    > .columns,
+    > section.columns {
+      display: block;
+      overflow: visible;
+    }
+
+    .SampleList,
+    .kit-editor {
+      height: auto;
+    }
+
+    .hero-body {
+      padding: .75rem;
+    }
+
+    .hero .level {
+      display: block;
+    }
+
+    .hero .level-right,
+    .hero .level-item {
+      margin-top: .5rem;
+    }
+  }
+}

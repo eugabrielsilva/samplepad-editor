@@ -1,6 +1,49 @@
 # Development
 This is only tested with the Alesis SampleRack, which should be functioning well. It _should_ work with a Alesis SamplePad Pro but I do not have one to test on. If you have one, please help me test it out!
 
+## Electron development
+
+The existing Electron application remains the desktop target for Windows, macOS and Linux.
+
+```bash
+npm install
+npm run dev
+```
+
+Production builds continue to use:
+
+```bash
+npm run build
+npm run pack:linux
+npm run pack:win
+npm run pack
+```
+
+## iOS development
+
+iOS uses the same Vite build through Capacitor 8 and requires Node 22 or newer. A macOS system with Xcode and the iOS SDK is required to run or archive the native app.
+
+```bash
+npm install
+npm run ios:sync
+npm run ios:open
+```
+
+`npm run ios:sync` builds the web app and updates the generated Xcode project. Open the Xcode workspace with `npm run ios:open` to select a team, signing profile and simulator/device.
+
+When the app starts on iOS, use **Load SD Card** and select the root of the connected/visible SamplePad storage in the system document picker. The iOS adapter retains a security-scoped bookmark so the same location can be reopened after restarting the app. If the storage is removed or its permission expires, select it again.
+
+The iOS runtime uses:
+
+- `@capacitor/filesystem` and `@capacitor/preferences` for external-folder operations and local preferences;
+- a small local `ExternalDirectoryPlugin` for the system document picker and security-scoped bookmark access;
+- `@eugabrielsilva/capacitor-midi-device` for native MIDI devices/events;
+- `@capgo/capacitor-native-audio` for native WAV playback.
+
+Electron continues to use its original preload, Node filesystem, `electron-store`, WebMidi and process-based audio implementation. Capacitor plugins are loaded only by the iOS runtime.
+
+MIDI availability still depends on the device/connection supported by the native MIDI plugin. If no MIDI input is available, kit editing, file operations and sample playback continue to work normally.
+
 # SamplePad Kit Editor
 ![](https://img.shields.io/github/v/release/lesserchance/samplepad-editor?include_prereleases)
 ![](https://img.shields.io/github/downloads/lesserchance/samplepad-editor/total)
@@ -14,7 +57,7 @@ The current version is v.6
 [Download v.6 for Linux](https://github.com/LesserChance/samplepad-editor/releases/download/v0.6/samplepad-editor-0.6.0.tar.gz)  
 
 ## Overview
-SamplePad Kit Editor is an application that allows you to create and edit custom drum kits for the [Alesis SamplePad Pro](https://www.alesis.com/products/view2/samplepad-pro) or [Alesis SampleRack](https://www.alesis.com/products/view2/samplerack) directly on your Mac or PC. It uses an intuitive drap and drop interface to quickly and easily create custom drum kits. All pad parameters are available to edit, and it's significantly easier than scrolling through all the details on the SamplePad itself.
+SamplePad Kit Editor is an application that allows you to create and edit custom drum kits for the [Alesis SamplePad Pro](https://www.alesis.com/products/view2/samplepad-pro) or [Alesis SampleRack](https://www.alesis.com/products/view2/samplerack) on Electron desktop platforms or iOS. It uses an intuitive drag and drop interface to quickly and easily create custom drum kits. All pad parameters are available to edit, and it's significantly easier than scrolling through all the details on the SamplePad itself.
 
 <img src="https://raw.githubusercontent.com/LesserChance/samplepad-editor/master/docs/SamplePad%20Kit%20Editor%20v6.png" alt="v0.6 screenshot" width="400">
 

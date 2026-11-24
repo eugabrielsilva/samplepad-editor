@@ -5,9 +5,9 @@ import { confirmDeleteSample } from 'actions/modal'
 import { Sample } from 'state/models'
 import { openSampleFileDialog } from 'util/fileDialog'
 import { copySample } from 'util/storage'
+import { getPlatformApi, isElectron } from 'platform/runtime'
 
-/* Electron imports */
-const { store, fs, path } = window.api
+const { store, fs, path } = getPlatformApi()
 
 /**
  * responsible for managing sample file and display names
@@ -96,6 +96,10 @@ class SampleStore {
    * Open a file dialog, and move the selected files into the drive
    */
   importSamples() {
+    if (!isElectron) {
+      return this.importSamplesCapacitor()
+    }
+
     return (dispatch, getState) => {
       openSampleFileDialog()
         .then(result => {
@@ -160,12 +164,77 @@ class SampleStore {
     }
   }
 
+  importSamplesCapacitor() {
+    return (dispatch, getState) => {
+      return openSampleFileDialog()
+        .then(async (result) => {
+          if (result.canceled) {
+            return null
+          }
+
+          dispatch(showNotice("is-warning", "Import processing..."))
+
+          let fileCount = getState().drive.samples.length
+          let hadCopyError = false
+
+          const parseDirectory = async (fileList) => {
+            for (const file of fileList) {
+              if (fileCount >= Drive.MAX_SAMPLES) {
+                return
+              }
+
+              if (await fs.isDirectory(file)) {
+                await parseDirectory(await fs.getFileListFromDirectory(file))
+                continue
+              }
+
+              const samplePath = path.parse(file)
+
+              if (samplePath.ext.toLowerCase() === Drive.SAMPLE_EXTENSION) {
+                const sample = this.addSample(samplePath.name, false)
+
+                try {
+                  await copySample(file, this.devicePath, sample.fileNameOnDisk)
+                  this._addFileReference(sample.fileName)
+                  fileCount++
+                } catch (error) {
+                  console.error("Unable to import sample.", error)
+                  hadCopyError = true
+                }
+              }
+            }
+          }
+
+          await parseDirectory(result.filePaths)
+          await this._saveSamples()
+          dispatch({ type: Actions.RESET_SAMPLES, samples: Object.keys(this.deviceSamples) })
+
+          if (hadCopyError) {
+            dispatch(showNotice("is-warning", "There was a problem importing one or more samples."))
+          } else {
+            dispatch(showNotice("is-success", "Samples successfully imported."))
+          }
+
+          return null
+        })
+        .catch((error) => {
+          console.error("Unable to open or import samples.", error)
+          dispatch(showNotice("is-danger", "There was a problem importing the samples."))
+          return null
+        })
+    }
+  }
+
   /**
    * Delete a sample from the current device.
    * @param {String} fileName
    * @param {Boolean} confirmedDelete
    */
   deleteSample(fileName, confirmedDelete=false) {
+    if (!isElectron) {
+      return this.deleteSampleCapacitor(fileName, confirmedDelete)
+    }
+
     return (dispatch, getState) => {
       if (!confirmedDelete) {
         dispatch(confirmDeleteSample(fileName, (result) => {
@@ -211,6 +280,56 @@ class SampleStore {
     }
   }
 
+  deleteSampleCapacitor(fileName, confirmedDelete=false) {
+    return (dispatch, getState) => {
+      if (!confirmedDelete) {
+        dispatch(confirmDeleteSample(fileName, (result) => {
+          return (dispatch) => {
+            if (result) {
+              return dispatch(this.deleteSample(fileName, true))
+            }
+
+            return null
+          }
+        }))
+        return
+      }
+
+      const normalizedFileName = fileName.toLowerCase()
+      const sampleName = Object.keys(this.deviceSamples).find(
+        name => name.toLowerCase() === normalizedFileName
+      )
+
+      if (!sampleName) {
+        dispatch(showNotice("is-danger", "Unable to find the sample to delete."))
+        return
+      }
+
+      const fileNameOnDisk = this.deviceSamples[sampleName]
+      const samplePath = this.devicePath + "/" + fileNameOnDisk
+
+      return (async () => {
+        try {
+          if (await fs.exists(samplePath)) {
+            await fs.deleteFile(samplePath)
+          }
+
+          this._removeFileReference(sampleName)
+          delete this.deviceSamples[sampleName]
+          await this._saveSamples()
+        } catch (error) {
+          console.error("Unable to delete sample.", error)
+          dispatch(showNotice("is-danger", "There was a problem deleting the sample from the SD card."))
+          return
+        }
+
+        this._clearPadReferences(dispatch, getState().pads, sampleName, fileNameOnDisk)
+        dispatch({ type: Actions.RESET_SAMPLES, samples: Object.keys(this.deviceSamples) })
+        dispatch(showNotice("is-success", `Sample "${sampleName}" deleted from the SD card.`))
+      })()
+    }
+  }
+
   _clearPadReferences(dispatch, pads, displayName, fileNameOnDisk) {
     const sampleNames = new Set([
       displayName.toLowerCase(),
@@ -236,6 +355,10 @@ class SampleStore {
    * @param {String} devicePath
    */
   loadSamplesFromDirectory(deviceId, devicePath) {
+    if (!isElectron) {
+      return this.loadSamplesFromDirectoryCapacitor(deviceId, devicePath)
+    }
+
     const cachedSamples = this.samples[deviceId] || {}
     const filesOnDisk = Object.fromEntries(
       fs.getSampleFiles(devicePath)
@@ -290,6 +413,57 @@ class SampleStore {
       ._saveDevicePath(devicePath)
   }
 
+  async loadSamplesFromDirectoryCapacitor(deviceId, devicePath) {
+    const cachedSamples = this.samples[deviceId] || {}
+    const sampleFiles = await fs.getSampleFiles(devicePath)
+    const filesOnDisk = Object.fromEntries(
+      sampleFiles.map((dirent) => [dirent.name.toLowerCase(), dirent.name])
+    )
+    const reconciledSamples = {}
+
+    Object.entries(cachedSamples).forEach(([displayName, fileNameOnDisk]) => {
+      const currentFileName = filesOnDisk[fileNameOnDisk.toLowerCase()]
+      if (currentFileName) {
+        reconciledSamples[displayName] = currentFileName
+      }
+    })
+
+    const mappedFiles = new Set(
+      Object.values(reconciledSamples).map(fileName => fileName.toLowerCase())
+    )
+
+    Object.values(filesOnDisk).forEach((fileName) => {
+      if (mappedFiles.has(fileName.toLowerCase())) {
+        return
+      }
+
+      let displayName = fileName
+      let count = 1
+      const usedDisplayNames = new Set(
+        Object.keys(reconciledSamples).map(name => name.toLowerCase())
+      )
+
+      while (usedDisplayNames.has(displayName.toLowerCase())) {
+        const extensionIndex = fileName.lastIndexOf('.')
+        const name = extensionIndex > -1 ? fileName.slice(0, extensionIndex) : fileName
+        const extension = extensionIndex > -1 ? fileName.slice(extensionIndex) : ''
+        displayName = name + count + extension
+        count++
+      }
+
+      reconciledSamples[displayName] = fileName
+      mappedFiles.add(fileName.toLowerCase())
+    })
+
+    this.deviceId = deviceId
+    this.devicePath = devicePath
+    this.deviceSamples = reconciledSamples
+
+    await this._saveSamples()
+    await this._saveDevicePath(devicePath)
+    return this
+  }
+
   /**
    * Add a new file to the current device
    * @param {String} fileName
@@ -320,15 +494,23 @@ class SampleStore {
 
   _saveSamples() {
     this.samples[this.deviceId] = this.deviceSamples
-    store.save('samples', this.samples)
+    const save = store.save('samples', this.samples)
     this._loadFilenames()
+
+    if (!isElectron) {
+      return save.then(() => this)
+    }
 
     return this
   }
 
   _saveDevicePath(devicePath) {
     this.devicePaths[this.deviceId] = devicePath
-    store.save('devicePaths', this.devicePaths)
+    const save = store.save('devicePaths', this.devicePaths)
+
+    if (!isElectron) {
+      return save.then(() => this)
+    }
 
     return this
   }

@@ -5,9 +5,11 @@ import { connect } from 'react-redux'
 /* App imports */
 import { DeviceType } from 'const'
 import { selectAndLoadDrive } from 'actions/drive'
+import { isCapacitor } from 'platform/runtime'
 
 /* Component imports */
 import KitListComponent from 'component/KitList'
+import CapacitorControls from 'component/CapacitorControls'
 
 const HeaderComponent = (props) => {
   return (
@@ -26,11 +28,16 @@ const HeaderComponent = (props) => {
 
             <div className="level-right">
               <div className="level-item">
-
-                <KitListComponent />
+                {isCapacitor && <CapacitorControls loadCard={props.loadCard} />}
+                {!isCapacitor && <KitListComponent />}
               </div>
             </div>
           </div>
+          {isCapacitor &&
+            <div className="capacitor-kit-list">
+              <KitListComponent />
+            </div>
+          }
         </div>
       </div>
     </section>

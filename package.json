@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "vite build",
+    "ios:sync": "npm run build && cap sync ios",
+    "ios:open": "cap open ios",
     "pack": "vite build && electron-builder build --mac",
     "pack:win": "vite build && electron-builder build --win --x64",
     "pack:linux": "vite build && electron-builder build --linux --x64",
@@ -59,12 +61,19 @@
     }
   },
   "dependencies": {
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/ios": "^8.6.2",
+    "@capacitor/preferences": "^8.0.1",
+    "@capgo/capacitor-native-audio": "^8.5.6",
+    "@eugabrielsilva/capacitor-midi-device": "^8.0.1",
     "electron-store": "^11.0.2",
     "immutability-helper": "^3.1.1",
     "rc-slider": "^11.1.7",
     "react": "^19.2.4",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
+    "react-dnd-touch-backend": "^16.0.1",
     "react-dom": "^19.2.4",
     "react-redux": "^9.2.0",
     "redux": "^5.0.1",
@@ -74,6 +83,7 @@
     "webmidi": "^3.1.14"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "buffer": "^6.0.3",
     "concurrently": "^9.2.1",
     "electron": "^40.6.0",
