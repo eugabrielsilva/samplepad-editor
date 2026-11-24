@@ -38,16 +38,16 @@ module.exports = {
     return fs.readdirSync(sampleDirectoryPath, {withFileTypes: true})
       .filter((dirent) => {
         return dirent.isFile()
+          && !dirent.name.startsWith(".")
           && path.extname(dirent.name).toUpperCase() === ".WAV"
-          && !(/(^|\/)\.[^/.]/g).test(dirent.name)
       })
   },
   getKitFiles: (kitPath) => {
     return fs.readdirSync(kitPath, {withFileTypes: true})
       .filter((dirent) => {
         return dirent.isFile()
+          && !dirent.name.startsWith(".")
           && path.extname(dirent.name).toUpperCase() === ".KIT"
-          && !(/(^|\/)\.[^/.]/g).test(dirent.name)
       })
   }
 }
