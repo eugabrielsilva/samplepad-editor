@@ -5,6 +5,7 @@ import { showNotice } from 'actions/notice';
 import { getGlobalStateFromDirectory } from 'state/globalState';
 import { openDriveDirectoryDialog } from 'util/fileDialog';
 import { storeLastLoadedDirectory } from 'util/storage';
+import { restoreLastSelectedKit } from 'actions/app';
 
 /** DRIVE ACTION CREATORS */
 /**
@@ -58,5 +59,6 @@ export function loadDrive(drivePath) {
       dispatch({ type: Actions.LOAD_DRIVE, drive: drive });
       dispatch({ type: Actions.RESET_KITS, kits: kits });
       dispatch({ type: Actions.SORT_KITS });
+      dispatch(restoreLastSelectedKit());
   }
 }

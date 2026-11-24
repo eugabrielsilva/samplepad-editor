@@ -25,6 +25,32 @@ export function getLastLoadedDirectory() {
 }
 
 /**
+ * Store the selected kit for a specific device.
+ * @param {String} deviceId
+ * @param {?String} fileName
+ */
+export function storeLastSelectedKit(deviceId, fileName) {
+  let lastSelectedKits = store.get('lastSelectedKits') || {};
+
+  if (fileName) {
+    lastSelectedKits[deviceId] = fileName;
+  } else {
+    delete lastSelectedKits[deviceId];
+  }
+
+  store.save('lastSelectedKits', lastSelectedKits);
+}
+
+/**
+ * @param {String} deviceId
+ * @return {?String} the last kit file selected for this device
+ */
+export function getLastSelectedKit(deviceId) {
+  let lastSelectedKits = store.get('lastSelectedKits') || {};
+  return lastSelectedKits[deviceId] || null;
+}
+
+/**
  * Copy a source sample to the sample directory
  * @param {String} source
  * @return {String} new sample file path

@@ -25,6 +25,27 @@ const PadLayerAComponent = (props) => {
     min: pad.velocityMin,
     max: pad.velocityMax
   }
+  
+  const getModeTooltip = (mode) => {
+    switch (mode) {
+      case 0:
+        return "MONO";
+      case 1:
+        return "POLY";
+      case 2:
+        return "LOOP";
+      case 3:
+        return "STOP";
+      case 4:
+        return "TMP";
+      case 5:
+        return "CLK";
+      case 6:
+        return "HAT";
+      default:
+        return "";
+    }
+  }
 
   return (
     <div className="PadLayer layerA">
@@ -32,7 +53,7 @@ const PadLayerAComponent = (props) => {
         <div className="level-left">
           <PadNameComponent
               padName={padName}
-              padClass={"has-background-grey-lighter"}
+              padClass={!props.isPro ? "has-background-grey-lighter" : ''}
               midi={midiProps} />
 
           <div className="level-item MidiNote">
@@ -108,7 +129,7 @@ const PadLayerAComponent = (props) => {
               overlayProperty='width'
               onChange={(value) => props.updatePadIntProperty("level", value)}/>
 
-            <span className="modeIcon">
+            <span className="modeIcon has-tooltip-bottom" data-tooltip={'Mode: ' + getModeTooltip(pad.mode)}>
               <div className="field">
                 <div className="control">
                   <div className="select is-small">

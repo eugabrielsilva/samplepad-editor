@@ -5,7 +5,7 @@ import { showNotice } from 'actions/notice';
 import { KitModel, PadModel } from 'state/models';
 import { openKitFileDialog } from 'util/fileDialog';
 import { getKitAndPadsFromFile } from 'util/kitFile';
-import { saveKitToFile, kitWillOverwriteExisting } from 'util/storage';
+import { saveKitToFile, kitWillOverwriteExisting, storeLastSelectedKit } from 'util/storage';
 
 /** KIT ACTION CREATORS */
 /**
@@ -33,6 +33,7 @@ export function importKitFromFile() {
           dispatch({ type: Actions.SET_SELECTED_KIT_ID, kitId: kit.id });
           dispatch({ type: Actions.SET_ACTIVE_KIT_ID, kitId: kit.id });
           dispatch({ type: Actions.SORT_KITS });
+          storeLastSelectedKit(state.drive.deviceId, kit.fileName);
         } catch (err) {
           console.error(err);
           dispatch(
@@ -119,6 +120,7 @@ export function loadNewKit(presetData=null) {
     dispatch({ type: Actions.SET_SELECTED_KIT_ID, kitId: kit.id });
     dispatch({ type: Actions.SET_ACTIVE_KIT_ID, kitId: kit.id });
     dispatch({ type: Actions.SORT_KITS });
+    storeLastSelectedKit(state.drive.deviceId, kit.fileName);
   }
 }
 /**
@@ -183,6 +185,9 @@ export function saveKit(kitId, asNew=false, confirmedOverwrite=false) {
       fileName: fileName
     }));
     dispatch({ type: Actions.SORT_KITS });
+    if (state.app.selectedKitId === kitId) {
+      storeLastSelectedKit(state.drive.deviceId, fileName);
+    }
     dispatch(
       showNotice("is-success", "Kit saved.")
     );

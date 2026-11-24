@@ -2,6 +2,7 @@
 import { Actions } from 'const';
 import store from 'state/store'
 import { getGlobalStateFromDirectory, writeDeviceDetailsToFile } from 'state/globalState';
+import { restoreLastSelectedKit } from 'actions/app';
 
 /* Electron imports */
 const { mainProcessCallbacks, mainProcessTriggers } = window.api
@@ -43,6 +44,7 @@ export const selectDeviceTypeItem = (deviceType) => {
     let {drive, kits} = getGlobalStateFromDirectory(state.drive.rootPath);
     store.dispatch({ type: Actions.RESET_KITS, kits: kits });
     store.dispatch({ type: Actions.SORT_KITS });
+    store.dispatch(restoreLastSelectedKit());
   } else {
     // change the drive device type
     store.dispatch({ type: Actions.SET_DEVICE_TYPE, deviceType: deviceType });
