@@ -153,30 +153,62 @@ class SampleStore {
   }
 
   /**
-   * Given a directory, load the sample list from disk if it already exists
-   * otherwise read all the samples and store it to disk
+   * Load the sample list from disk and preserve display names from the cache.
    * @param {String} devicePath
    */
   loadSamplesFromDirectory(deviceId, devicePath) {
-    if (this.samples[deviceId]) {
-      // if we already have reference to this device, use the stored state
-      this._loadDevice(deviceId)
-    } else {
-      // otherwise load state from disk
-      this.deviceId = deviceId
-      this.devicePath = devicePath
+    const cachedSamples = this.samples[deviceId] || {}
+    const filesOnDisk = Object.fromEntries(
+      fs.getSampleFiles(devicePath)
+        .map((dirent) => [dirent.name.toLowerCase(), dirent.name])
+    )
+    const reconciledSamples = {}
 
-      this.deviceSamples = Object.fromEntries(
-        fs.getSampleFiles(devicePath)
-          .map((dirent) => {
-            return [dirent.name, dirent.name]
-          })
-        )
+    Object.entries(cachedSamples).forEach(([displayName, fileNameOnDisk]) => {
+      const currentFileName = filesOnDisk[fileNameOnDisk.toLowerCase()]
+      if (currentFileName) {
+        reconciledSamples[displayName] = currentFileName
+      }
+    })
 
-      this
-        ._saveSamples()
-        ._saveDevicePath(devicePath)
-    }
+    const mappedFiles = new Set(
+      Object.values(reconciledSamples).map(fileName => fileName.toLowerCase())
+    )
+
+    Object.values(filesOnDisk).forEach((fileName) => {
+      if (mappedFiles.has(fileName.toLowerCase())) {
+        return
+      }
+
+      let displayName = fileName
+      let count = 1
+      const usedDisplayNames = new Set(
+        Object.keys(reconciledSamples).map(name => name.toLowerCase())
+      )
+
+      while (usedDisplayNames.has(displayName.toLowerCase())) {
+        const extensionIndex = fileName.lastIndexOf('.')
+        const name = extensionIndex > -1
+          ? fileName.slice(0, extensionIndex)
+          : fileName
+        const extension = extensionIndex > -1
+          ? fileName.slice(extensionIndex)
+          : ''
+        displayName = name + count + extension
+        count++
+      }
+
+      reconciledSamples[displayName] = fileName
+      mappedFiles.add(fileName.toLowerCase())
+    })
+
+    this.deviceId = deviceId
+    this.devicePath = devicePath
+    this.deviceSamples = reconciledSamples
+
+    this
+      ._saveSamples()
+      ._saveDevicePath(devicePath)
   }
 
   /**
