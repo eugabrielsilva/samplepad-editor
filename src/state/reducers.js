@@ -14,7 +14,10 @@ let initialState = {
     confirmOverwriteVisible: false,
     confirmOverwriteCallback: null,
     confirmLoadCardVisible: false,
-    confirmLoadCardCallback: null
+    confirmLoadCardCallback: null,
+    confirmDeleteSampleVisible: false,
+    confirmDeleteSampleFileName: null,
+    confirmDeleteSampleCallback: null
   },
   notices: [],
   drive: {
@@ -102,6 +105,18 @@ function modals(state = initialModalState, action) {
     case Actions.HIDE_MODAL_CONFIRM_LOAD_CARD:
       return update(state, {
         confirmLoadCardVisible: {$set: false}
+      });
+
+    case Actions.SHOW_MODAL_CONFIRM_DELETE_SAMPLE:
+      return update(state, {
+        confirmDeleteSampleVisible: {$set: true},
+        confirmDeleteSampleFileName: {$set: action.fileName},
+        confirmDeleteSampleCallback: {$set: action.callback}
+      });
+
+    case Actions.HIDE_MODAL_CONFIRM_DELETE_SAMPLE:
+      return update(state, {
+        confirmDeleteSampleVisible: {$set: false}
       });
 
     default:

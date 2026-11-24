@@ -25,6 +25,8 @@ export const Actions = {
   HIDE_MODAL_CONFIRM_OVERWRITE: 'HIDE_MODAL_CONFIRM_OVERWRITE',
   SHOW_MODAL_CONFIRM_LOAD_CARD: 'SHOW_MODAL_CONFIRM_LOAD_CARD',
   HIDE_MODAL_CONFIRM_LOAD_CARD: 'HIDE_MODAL_CONFIRM_LOAD_CARD',
+  SHOW_MODAL_CONFIRM_DELETE_SAMPLE: 'SHOW_MODAL_CONFIRM_DELETE_SAMPLE',
+  HIDE_MODAL_CONFIRM_DELETE_SAMPLE: 'HIDE_MODAL_CONFIRM_DELETE_SAMPLE',
 
   /* notice action types */
   SHOW_NOTICE: 'SHOW_NOTICE'
@@ -51,7 +53,7 @@ export const KitErrors = {
 };
 
 export const KitErrorStrings = {
-  INVALID_KIT_NAME: 'Kit name contains invalid characters (A-Z, _, a-z, 0-9 only)',
+  INVALID_KIT_NAME: 'Kit name must contain 1-8 valid characters (A-Z, _, a-z, 0-9)',
 };
 
 export const DragItemTypes = {

@@ -45,3 +45,26 @@ export function confirmLoadCardAction(result) {
     dispatch(callback(result));
   }
 }
+
+/**
+ * @param {String} fileName - sample display name
+ * @param {Function} callback - function to call when the modal is closed
+ */
+export function confirmDeleteSample(fileName, callback) {
+  return (dispatch, getState) => {
+    dispatch({ type: Actions.SHOW_MODAL_CONFIRM_DELETE_SAMPLE, fileName: fileName, callback: callback });
+  }
+}
+
+/**
+ * @param {Boolean} result - true if the user chose to delete
+ */
+export function confirmDeleteSampleAction(result) {
+  return (dispatch, getState) => {
+    let state = getState();
+    let callback = state.modals.confirmDeleteSampleCallback;
+
+    dispatch({ type: Actions.HIDE_MODAL_CONFIRM_DELETE_SAMPLE });
+    dispatch(callback(result));
+  }
+}

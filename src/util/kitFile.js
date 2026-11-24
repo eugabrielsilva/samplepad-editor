@@ -23,7 +23,7 @@ const MEMLOC = {
   velocityMin:  0x82,
   velocityMax:  0x83,
   velocityMinB: 0xa2,
-  velocityMaxB: 0xa4,
+  velocityMaxB: 0xa3,
 
   hasFileLayerA:   0x80,
   fileNameLength:  0x87,
@@ -79,18 +79,20 @@ export const getKitAndPadsFromFile = (drive, kitFile) => {
  */
 export const getKitFileBuffer = (drive, kit, pads) => {
   let buffer = [];
+  let padTypes = KitBuffer.PAD_FILE_ORDER[drive.deviceType];
+  let padCount = padTypes.length;
 
   // header
-  buffer = buffer.concat(getHeader(kit.kitName));
+  buffer = buffer.concat(getHeader(kit.kitName, padCount));
 
-  KitBuffer.PAD_FILE_ORDER[drive.deviceType].forEach((padType) => {
+  padTypes.forEach((padType) => {
     let pad = getPadWithType(kit, pads, padType);
-    buffer = buffer.concat(getPadBlock1(pad));
+    buffer = buffer.concat(getPadBlock1(pad, padCount));
   });
 
-  KitBuffer.PAD_FILE_ORDER[drive.deviceType].forEach((padType) => {
+  padTypes.forEach((padType) => {
     let pad = getPadWithType(kit, pads, padType);
-    buffer = buffer.concat(getPadBlock2(pad));
+    buffer = buffer.concat(getPadBlock2(pad, padCount));
   });
 
   // splice in the checksum
@@ -223,7 +225,8 @@ export const getPadWithType = (kit, pads, padType) => {
  */
 const unpack = (str, padLength, padByte) => {
   let strBuffer = Array(padLength).fill(padByte);
-  strBuffer.splice(0, str.length, ...Buffer.from(str));
+  let bytes = Buffer.from(str).slice(0, padLength);
+  strBuffer.splice(0, bytes.length, ...bytes);
 
   return strBuffer;
 }
@@ -231,11 +234,11 @@ const unpack = (str, padLength, padByte) => {
 /**
  * Kit File Header - one per kit file
  * Header contains checksum at byte 0x08
- * And kit name (which seems unecessary since kit name is read from the file) starting at byte 0x48
+ * And kit name starting at byte 0x48
  * Kit Name String length is at byte 0x47
  * @return {Byte[]}
  */
-const getHeader = (kitName) => {
+const getHeader = (kitName, padCount) => {
   let block = [
     0x4b, 0x49, 0x54, 0x48, 0x00, 0x80, 0x00, 0x00, 0xeb, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -247,6 +250,11 @@ const getHeader = (kitName) => {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   ];
 
+  let kitNameBytes = unpack(kitName, 8, 0x00)
+  block.splice(0x0b, 1, padCount);
+  block.splice(0x47, 1, kitName.length);
+  block.splice(0x48, 8, ...kitNameBytes);
+
   return block;
 }
 
@@ -255,7 +263,7 @@ const getHeader = (kitName) => {
  * @param {PadModel} pad
  * @return {Byte[]}
  */
-const getPadBlock1 = (pad) => {
+const getPadBlock1 = (pad, padCount) => {
   // note: sensitivity here is the INTERNAL value
   // 1=11 (0x0c), 2=14 3=17 4=20 5=23 6=26 7=29 8=32
   let block = [
@@ -287,6 +295,7 @@ const getPadBlock1 = (pad) => {
   block.splice(MEMLOC.mode, 1,        pad.mode);
   block.splice(MEMLOC.sensitivity, 1, PadModel.getSensitivityFileValue(pad.sensitivity));
   block.splice(MEMLOC.mgrp, 1,        pad.mgrp);
+  block.splice(0x23, 1, padCount);
 
   return block;
 }
@@ -296,7 +305,7 @@ const getPadBlock1 = (pad) => {
  * @param {PadModel} pad
  * @return {Byte[]}
  */
-const getPadBlock2 = (pad) => {
+const getPadBlock2 = (pad, padCount) => {
   let block = [
     0x4b, 0x49, 0x54, 0x49, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -330,6 +339,7 @@ const getPadBlock2 = (pad) => {
   block.splice(MEMLOC.velocityMax, 1,  pad.velocityMax);
   block.splice(MEMLOC.velocityMinB, 1, pad.velocityMinB);
   block.splice(MEMLOC.velocityMaxB, 1, pad.velocityMaxB);
+  block.splice(0x23, 1, padCount);
 
   // splice in the file information
   let fileName = SampleStore.getWriteFileName(pad.fileName)
@@ -338,7 +348,8 @@ const getPadBlock2 = (pad) => {
   block.splice(MEMLOC.fileNameLength, 1, fileName.length);
   block.splice(MEMLOC.displayName, 8, ...fileNameUpperBytes);
   block.splice(MEMLOC.fileName, 8, ...fileNameBytes);
-  block.splice(MEMLOC.hasFileLayerA, 1, ((fileName === "") ? 0xff : 0xaa));
+  let fileLayerAMarker = ((fileName === "") ? 0xff : 0xaa);
+  block.splice(MEMLOC.hasFileLayerA, 2, fileLayerAMarker, fileLayerAMarker);
 
   // splice in the file information for layer b
   let fileNameB = SampleStore.getWriteFileName(pad.fileNameB)
@@ -347,7 +358,8 @@ const getPadBlock2 = (pad) => {
   block.splice(MEMLOC.fileNameBLength, 1, fileNameB.length);
   block.splice(MEMLOC.displayNameB, 8, ...fileNameBUpperBytes);
   block.splice(MEMLOC.fileNameB, 8, ...fileNameBBytes);
-  block.splice(MEMLOC.hasFileLayerB, 1, ((fileNameB === "") ? 0xff : 0xaa));
+  let fileLayerBMarker = ((fileNameB === "") ? 0xff : 0xaa);
+  block.splice(MEMLOC.hasFileLayerB, 2, fileLayerBMarker, fileLayerBMarker);
 
   return block;
 }

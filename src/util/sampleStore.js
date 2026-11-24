@@ -1,6 +1,7 @@
 /* App imports */
 import { Actions, Drive } from 'const'
 import { showNotice } from 'actions/notice'
+import { confirmDeleteSample } from 'actions/modal'
 import { Sample } from 'state/models'
 import { openSampleFileDialog } from 'util/fileDialog'
 import { copySample } from 'util/storage'
@@ -59,7 +60,14 @@ class SampleStore {
       return ""
     }
 
-    return this.deviceSamples[fileName].replace(Drive.SAMPLE_EXTENSION, "")
+    let fileNameOnDisk = this.deviceSamples[fileName]
+    if (!fileNameOnDisk) {
+      return ""
+    }
+
+    return fileNameOnDisk
+      .replace(/\.wav$/i, "")
+      .slice(0, Drive.MAX_FILENAME_LENGTH)
   }
 
   getFileNameFromKitFile(fileName) {
@@ -150,6 +158,77 @@ class SampleStore {
           },100)
         })
     }
+  }
+
+  /**
+   * Delete a sample from the current device.
+   * @param {String} fileName
+   * @param {Boolean} confirmedDelete
+   */
+  deleteSample(fileName, confirmedDelete=false) {
+    return (dispatch, getState) => {
+      if (!confirmedDelete) {
+        dispatch(confirmDeleteSample(fileName, (result) => {
+          return (dispatch, getState) => {
+            if (result) {
+              dispatch(this.deleteSample(fileName, true))
+            }
+          }
+        }))
+        return
+      }
+
+      const normalizedFileName = fileName.toLowerCase()
+      const sampleName = Object.keys(this.deviceSamples).find(
+        name => name.toLowerCase() === normalizedFileName
+      )
+
+      if (!sampleName) {
+        dispatch(showNotice("is-danger", "Unable to find the sample to delete."))
+        return
+      }
+
+      const fileNameOnDisk = this.deviceSamples[sampleName]
+      const samplePath = this.devicePath + "/" + fileNameOnDisk
+
+      try {
+        if (fs.exists(samplePath)) {
+          fs.deleteFile(samplePath)
+        }
+
+        this._removeFileReference(sampleName)
+        delete this.deviceSamples[sampleName]
+        this._saveSamples()
+      } catch (error) {
+        console.error("Unable to delete sample.", error)
+        dispatch(showNotice("is-danger", "There was a problem deleting the sample from the SD card."))
+        return
+      }
+
+      this._clearPadReferences(dispatch, getState().pads, sampleName, fileNameOnDisk)
+      dispatch({ type: Actions.RESET_SAMPLES, samples: Object.keys(this.deviceSamples) })
+      dispatch(showNotice("is-success", `Sample "${sampleName}" deleted from the SD card.`))
+    }
+  }
+
+  _clearPadReferences(dispatch, pads, displayName, fileNameOnDisk) {
+    const sampleNames = new Set([
+      displayName.toLowerCase(),
+      fileNameOnDisk.toLowerCase()
+    ])
+
+    Object.values(pads).forEach((pad) => {
+      ['fileName', 'fileNameB'].forEach((property) => {
+        if (pad[property] && sampleNames.has(pad[property].toLowerCase())) {
+          dispatch({
+            type: Actions.UPDATE_PAD_PROPERTY,
+            padId: pad.id,
+            property: property,
+            value: null
+          })
+        }
+      })
+    })
   }
 
   /**

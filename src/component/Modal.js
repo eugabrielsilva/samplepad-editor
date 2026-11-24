@@ -3,7 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux'
 
 /* App imports */
-import { confirmFileOverwriteAction, confirmLoadCardAction } from 'actions/modal'
+import { confirmFileOverwriteAction, confirmLoadCardAction, confirmDeleteSampleAction } from 'actions/modal'
 
 const ModalComponent = (props) => {
   return (
@@ -55,6 +55,33 @@ const ModalComponent = (props) => {
           </div>
         </div>
       }
+
+      {props.showConfirmDeleteSample &&
+        <div className="modal is-active">
+          <div className="modal-background"></div>
+          <div className="modal-content">
+            <div className="message is-danger">
+              <div className="message-header">
+                <p>Delete sample?</p>
+              </div>
+              <div className="message-body">
+                <div className="is-clearfix">
+                  The sample <strong>{props.sampleToDelete}</strong> will be permanently deleted from the SD card.
+                  Are you sure you want to continue?
+                </div>
+
+                <div className="field is-grouped is-pulled-right is-marginless is-padingless">
+                  <div className="buttons control">
+                    <button className="button" onClick={props.closeConfirmDeleteSample}>Cancel</button>
+                    <button className="button is-danger" onClick={props.deleteSample}>Delete</button>
+                  </div>
+                </div>
+                <div className="is-clearfix" />
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   );
 }
@@ -62,7 +89,9 @@ const ModalComponent = (props) => {
 const mapStateToProps = (state, ownProps) => {
   return {
     showConfirmOverwrite: state.modals.confirmOverwriteVisible,
-    showConfirmLoadCard: state.modals.confirmLoadCardVisible
+    showConfirmLoadCard: state.modals.confirmLoadCardVisible,
+    showConfirmDeleteSample: state.modals.confirmDeleteSampleVisible,
+    sampleToDelete: state.modals.confirmDeleteSampleFileName
   }
 }
 
@@ -79,6 +108,12 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     dispatchCallbackAndCloseLoadCard: () => {
       dispatch(confirmLoadCardAction(true));
+    },
+    closeConfirmDeleteSample: () => {
+      dispatch(confirmDeleteSampleAction(false));
+    },
+    deleteSample: () => {
+      dispatch(confirmDeleteSampleAction(true));
     }
   }
 }

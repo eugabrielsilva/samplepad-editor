@@ -56,7 +56,11 @@ const SampleComponent = (props) => {
 
       { hasSample && props.removable &&
         <div className="removeSample">
-          <button className="link has-text-link is-paddingless" onClick={props.removeSample}>
+          <button
+            className="link has-text-link is-paddingless"
+            aria-label={props.removeLabel || "Remove sample"}
+            title={props.removeLabel || "Remove sample"}
+            onClick={props.removeSample}>
             <i className="glyphicon glyphicon-trash" aria-hidden="true" />
           </button>
         </div>

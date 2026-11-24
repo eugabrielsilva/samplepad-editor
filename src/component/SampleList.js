@@ -69,6 +69,9 @@ class SampleList extends React.Component {
                               fileName={file}
                               highlightKeyword={this.state.filter}
                               draggable={true}
+                              removable={true}
+                              removeLabel="Delete sample from SD card"
+                              removeSample={() => this.props.deleteSample(file)}
                             />
                           </SamplePlayerComponent>
                         )
@@ -100,6 +103,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     importSamples: () => {
       dispatch(SampleStore.importSamples());
+    },
+    deleteSample: (fileName) => {
+      dispatch(SampleStore.deleteSample(fileName));
     }
   }
 }

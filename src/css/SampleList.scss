@@ -16,6 +16,7 @@
 
     button.sample {
       text-align: left;
+      padding-right: 2.5em;
     }
 
     .sampleName {
@@ -23,6 +24,22 @@
       max-width: 10em;
       // overflow: hidden;
       // white-space: nowrap;
+    }
+
+    .sampleContainer {
+      position: relative;
+
+      .removeSample {
+        position: absolute;
+        top: 50%;
+        right: .75em;
+        transform: translateY(-50%);
+        z-index: 1;
+
+        button:hover {
+          color: #f14668;
+        }
+      }
     }
 
     .sampleContainer:hover {

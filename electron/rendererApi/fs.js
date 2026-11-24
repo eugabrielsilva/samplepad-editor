@@ -28,6 +28,9 @@ module.exports = {
   writeFile: (file, content) => {
     return fs.writeFileSync(file, content)
   },
+  deleteFile: (file) => {
+    return fs.unlinkSync(file)
+  },
   getFileListFromDirectory: (dirPath) => {
     return fs.readdirSync(dirPath)
       .map((dirFile) => {
