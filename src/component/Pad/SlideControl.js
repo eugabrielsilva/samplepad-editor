@@ -62,12 +62,12 @@ class SlideComponent extends React.Component {
     const displayValue = restProps.dragging ? value : this.props.value;
     const style = {};
 
-    if (this.props.overlayProperty === 'width') {
-      style.width = this.getWidth(displayValue);
-    }
-    if (this.props.overlayProperty === 'color') {
-      style.color = this.getColor(displayValue);
-    }
+    // if (this.props.overlayProperty === 'width') {
+    //   style.width = this.getWidth(displayValue);
+    // }
+    // if (this.props.overlayProperty === 'color') {
+    //   style.color = this.getColor(displayValue);
+    // }
 
     return (
       <div className="overlapHandle">

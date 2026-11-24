@@ -48,10 +48,21 @@
   .PadLayer .level-right {
     .modeIcon {
       padding-left: .2em;
+      display: flex;
+      align-items: flex-end;
+      
+      .field, .control, .select{
+        display: flex;
+        align-items: flex-end;
+      }
 
       select {
         padding-left: .25em !important;
         padding-right: .25em !important;
+        height: 20px;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-radius: 2px;
       }
       .select::after {
         display: none !important;
@@ -161,6 +172,14 @@
 }
 
 .samplepad-pro {
+  .PadLayer .level-item{
+    align-items: flex-end;
+  }
+  
+  .velocityContainer{
+    color: #858585;
+  }
+  
   .main-pad-cell {
     .Pad {
       height: 100%;
@@ -219,7 +238,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      align-items: center;
+      align-items: flex-end;
       gap: .18em;
       width: 100%;
       padding-top: .35em;
