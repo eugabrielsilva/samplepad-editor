@@ -19,3 +19,76 @@
   padding-right: .2em;
   padding-bottom: 2em;
 }
+
+.samplepad-pro {
+  .main-pads-title {
+    margin-bottom: .4em;
+  }
+
+  .main-pad-grid {
+    display: flex;
+    flex-direction: column;
+    gap: .65em;
+    padding: .85em;
+    border: 1px solid #777;
+    border-radius: 12px;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, .08), transparent 45%),
+      #353535;
+    box-shadow:
+      inset 0 0 0 2px #111,
+      0 .35em .8em rgba(0, 0, 0, .18);
+  }
+
+  .main-pad-row {
+    display: grid;
+    gap: .65em;
+  }
+
+  .main-pad-row-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 66.666%;
+    margin-inline: auto;
+  }
+
+  .main-pad-row-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .main-pad-cell {
+    min-width: 0;
+    padding: .55em;
+    border: 1px solid #64d9dd;
+    border-radius: 9px;
+    background:
+      linear-gradient(150deg, rgba(255, 255, 255, .1), transparent 36%),
+      #171717;
+    box-shadow:
+      inset 0 0 0 2px #080808,
+      inset 0 0 1.1em rgba(100, 217, 221, .08);
+  }
+
+  .external-pads {
+    margin-top: 1.5em;
+
+    > .is-size-5 {
+      margin-bottom: .25em;
+    }
+  }
+
+
+  @media (max-width: 1024px) {
+    .main-pad-row-2 {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .main-pad-row,
+    .main-pad-row-2,
+    .main-pad-row-3 {
+      grid-template-columns: 1fr;
+      width: 100%;
+    }
+  }
+}

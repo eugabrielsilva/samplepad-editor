@@ -9,26 +9,43 @@ import { getPadWithType } from 'util/kitFile'
 import PadRowComponent from 'component/Pad/Row'
 
 const EditKit = (props) => {
+  const padRows = [
+    props.mainPads.slice(0, 2),
+    props.mainPads.slice(2, 5),
+    props.mainPads.slice(5, 8)
+  ];
 
   return (
-    <div className="pad-table">
-      <div className="is-size-5">Main Pads</div>
-      {
-        props.mainPads.map((pad) => {
-          return (
-            <PadRowComponent padId={pad.id} key={pad.id} />
-          );
-        })
-      }
+    <div className="pad-table samplepad-pro">
+      <div className="is-size-5 main-pads-title">Main Pads</div>
+      <div className="main-pad-grid">
+        {
+          padRows.map((pads, rowIndex) => (
+            <div
+              className={`main-pad-row main-pad-row-${pads.length}`}
+              key={rowIndex}>
+              {
+                pads.map((pad) => (
+                  <div className="main-pad-cell" key={pad.id}>
+                    <PadRowComponent padId={pad.id} />
+                  </div>
+                ))
+              }
+            </div>
+          ))
+        }
+      </div>
 
-      <div className="mt-5 is-size-5">External Pads</div>
-      {
-        props.extPads.map((pad) => {
-          return (
-            <PadRowComponent padId={pad.id} key={pad.id} />
-          );
-        })
-      }
+      <div className="external-pads">
+        <div className="is-size-5">External Pads</div>
+        {
+          props.extPads.map((pad) => {
+            return (
+              <PadRowComponent padId={pad.id} key={pad.id} />
+            );
+          })
+        }
+      </div>
     </div>
   );
 }

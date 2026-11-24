@@ -12,6 +12,7 @@
     }
   }
 
+
   .PadLayer .level-left {
     width: 50%;
     padding-right: 2em;
@@ -156,5 +157,99 @@
     width: 100%;
     z-index: 1;
     opacity: 0.5;
+  }
+}
+
+.samplepad-pro {
+  .main-pad-cell {
+    .Pad {
+      height: 100%;
+    }
+
+    .PadLayer.layerA > .level {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: .45em;
+    }
+
+    .PadLayer .level-left {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: .35em;
+      width: 100%;
+      padding-right: 0;
+    }
+
+    .PadLayer .level-left .PadMidi {
+      min-width: 0;
+    }
+
+    .PadLayer .level-left .padName {
+      display: block;
+      width: 100%;
+      padding: .35em .55em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .PadLayer .level-left .MidiNote {
+      margin-left: 0;
+
+      select {
+        padding-left: .55em !important;
+      }
+    }
+
+    .PadLayer .level-left .Sample {
+      grid-column: 1 / -1;
+      width: 100%;
+      min-height: 2.2em;
+      border-color: rgba(255, 255, 255, .3);
+      background: #090909;
+    }
+
+    .PadLayer .level-right {
+      width: 100%;
+    }
+
+    .PadLayer .level-right > .level-item {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: .18em;
+      width: 100%;
+      padding-top: .35em;
+      border-top: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .sampleDrop {
+      min-height: 100%;
+      margin-bottom: 0;
+    }
+
+    .layerB {
+      margin: .55em 0 0;
+      padding-top: .55em;
+      border-top: 1px dashed rgba(255, 255, 255, .3);
+
+      .level-left {
+        width: 100%;
+      }
+
+      .padName {
+        width: 100%;
+        text-align: left;
+      }
+    }
+  }
+
+  @media (max-width: 800px) {
+    .main-pad-cell .PadLayer .level-right > .level-item {
+      justify-content: flex-start;
+    }
   }
 }
